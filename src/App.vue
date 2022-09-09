@@ -1,6 +1,6 @@
 <template>
   <div class="grid w-full p-3 flex justify-content-center">
-    <Card class="col-4 pl-4">
+    <Card class="col-6 pl-4">
       <template #content>
         <div class="grid">
           <div class="col-12 flex justify-content-center">
@@ -96,12 +96,14 @@
                 :class="{ invalid: v$.cpf.$error }"
                 v-model="formData.cpf"
                 @input="v$.cpf.$touch()"
-                @blur="formCpf($event.target)"
                 class="w-auto"
               />
-              <smal v-if="v$.cpf.$dirty && v$.cpf.required.$invalid" class="errorInputs">
+              <small v-if="v$.cpf.$dirty && v$.cpf.required.$invalid" class="errorInputs">
                 o campo cpf é obrigatório
-              </smal>
+              </small>
+              <small v-if="v$.cpf.$dirty && v$.cpf.cpf_validation.$invalid" class="errorInputs">
+                o campo cpf é invalido
+              </small>
             </div>
           </div>
 
@@ -114,9 +116,12 @@
                 @input="v$.cep.$touch()"
                 class="w-auto"
               />
-              <smal v-if="v$.cep.$dirty && v$.cep.required.$invalid" class="errorInputs">
+              <small v-if="v$.cep.$dirty && v$.cep.required.$invalid" class="errorInputs">
                 o campo cep é obrigatório
-              </smal>
+              </small>
+              <small v-if="v$.cep.$dirty && v$.cep.cep_validation.$invalid" class="errorInputs">
+                o campo cep é invalido
+              </small>
             </div>
           </div>
         </div>
@@ -153,20 +158,37 @@ const rules = {
   lastName: { required },
   email: { required, email },
   age: { required, minValue: minValue(0), maxValue: maxValue(120) },
-  cpf: { required },
-  cep: { required },
+  cpf: {
+    required,
+    cpf_validation: {
+      $validator: validCpf
+    }},
+  cep: {
+    required,
+    cep_validation: {
+      $validator: validCep
+    }
+  },
 };
 
 const v$ = useVuelidate(rules, formData);
-const cpfReg = /^(\d{3})(\d{3})(\d{3})(\d{2})/
 
-function formCpf (cpf: string) {
-  return cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+function validCpf(cpf: string) {
+  let validCpfPattern = new RegExp("[0-9]{3}.?[0-9]{3}.?[0-9]{3}-?/?[0-9]{2}");
+  if (validCpfPattern.test(cpf)) {
+    return true;
+  }
+  return false;
 }
 
-function formCep (cep: string) {
-  return cep.replace(/^(\d{5})(\d{2})/, '$1-$2')
+function validCep(cep: string) {
+  let validCepPattern = new RegExp("[0-9]{5}-?[0-9]{3}");
+  if (validCepPattern.test(cep)) {
+    return true;
+  }
+  return false;
 }
+
 </script>
 
 <style>
